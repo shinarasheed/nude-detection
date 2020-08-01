@@ -34,12 +34,25 @@ app.post("/upload", (req, res) => {
       .check(["nudity"])
       .set_file(`${__dirname}/public/uploads/${file.name}`)
       .then(function (result) {
-        console.log(result.nudity.raw);
+        const percentage = result.nudity.raw;
+        if (percentage > 0.5) {
+          fs.unlink(`${__dirname}/public/uploads/${file.name}`, () => {
+            return res
+              .status(400)
+              .json({ nude: percentage, msg: "nudes not allowed" });
+          });
+        } else {
+          res.json({
+            fileName: file.name,
+            nude: percentage,
+            filePath: `/uploads/${file.name}`,
+            msg: "file uploaded",
+          });
+        }
       })
       .catch(function (err) {
         console.error(err);
       });
-    // res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
   });
 });
 
