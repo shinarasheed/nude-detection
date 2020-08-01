@@ -14,67 +14,32 @@ app.use(express.static(`${__dirname}/public`));
 
 app.use(fileupload());
 
-//upload endpoint
-
-// app.get("/", (req, res) => {
-//   var data = {
-//     file_image: fs.createReadStream(imagePath2),
-//     API_KEY: "lSrJlVG6eH029N9SdGZVNwWQeHaJ5o0M",
-//     task: "porn_moderation",
-//   };
-
-//   request.post({ url: picpurifyUrl, formData: data }, function (
-//     err,
-//     httpResponse,
-//     body
-//   ) {
-//     if (!err && httpResponse.statusCode == 200) {
-//       const response = JSON.parse(body);
-//       console.log(response);
-//     }
-//   });
-//   res.send("hello");
-// });
-
 app.post("/upload", (req, res) => {
   if (req.files === null) {
     return res.status(400).json({ msg: "No file uploaded" });
   }
   const file = req.files.file;
+  var sightengine = require("sightengine")(
+    "1071904721",
+    "ejcyxQxPMubXT6P3PDzy"
+  );
+
   file.mv(`${__dirname}/public/uploads/${file.name}`, (err) => {
     if (err) {
       console.error(err);
       res.status(500).send(err);
     }
-    res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
-  });
 
-  // console.log(file);
-
-  var data = {
-    file_image: `uploads/${file.name}`,
-    API_KEY: "lSrJlVG6eH029N9SdGZVNwWQeHaJ5o0M",
-    task: "porn_moderation",
-  };
-
-  console.log(data.file_image);
-
-  request.post({ url: picpurifyUrl, formData: data }, function (
-    err,
-    httpResponse,
-    body
-  ) {
-    if (!err && httpResponse.statusCode == 200) {
-      console.log(body);
-      const response = JSON.parse(body);
-      if (response.porn_moderation.porn_content === true) {
-        return res.status(400).json({
-          msg: "porn alert",
-        });
-      }
-
-      console.log("success");
-    }
+    sightengine
+      .check(["nudity"])
+      .set_file(`${__dirname}/public/uploads/${file.name}`)
+      .then(function (result) {
+        console.log(result.nudity.raw);
+      })
+      .catch(function (err) {
+        console.error(err);
+      });
+    // res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
   });
 });
 
