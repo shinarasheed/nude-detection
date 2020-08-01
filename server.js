@@ -49,10 +49,8 @@ app.post("/upload", (req, res) => {
     res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
   });
 
-  // console.log(file);
-
   var data = {
-    file_image: `uploads/${file.name}`,
+    file_image: `${__dirname}/public/uploads/${file.name}`,
     API_KEY: "lSrJlVG6eH029N9SdGZVNwWQeHaJ5o0M",
     task: "porn_moderation",
   };
